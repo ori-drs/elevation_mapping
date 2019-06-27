@@ -373,6 +373,10 @@ bool ElevationMapping::fuseEntireMap(std_srvs::Empty::Request&, std_srvs::Empty:
 
 bool ElevationMapping::updatePrediction(const ros::Time& time)
 {
+  // DRS modification - to allow reprocessing of old logs
+  ROS_ERROR("Note: skipping motion predition (DRS modification)");
+  ignoreRobotMotionUpdates_ = true;
+
   if (ignoreRobotMotionUpdates_) return true;
 
   ROS_DEBUG("Updating map with latest prediction from time %f.", robotPoseCache_.getLatestTime().toSec());
