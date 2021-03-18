@@ -105,6 +105,12 @@ class ElevationMap {
   void visibilityCleanup(const ros::Time& updatedTime);
 
   /*!
+   * Removes parts of the map that have an elevation that is outside a range
+   * @param transformationSensorToMap
+   */
+  void elevationCleanup(const Eigen::Affine3d& transformationSensorToMap);
+
+  /*!
    * Move the grid map w.r.t. to the grid map frame.
    * @param position the new location of the elevation map in the map frame.
    */
@@ -329,6 +335,8 @@ class ElevationMap {
   bool enableContinuousCleanup_;
   double visibilityCleanupDuration_;
   double scanningDuration_;
+  double clear_points_below_;
+  double clear_points_above_;
 };
 
 }  // namespace elevation_mapping

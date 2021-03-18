@@ -224,6 +224,8 @@ bool ElevationMapping::readParameters() {
   nodeHandle_.param("enable_continuous_cleanup", map_.enableContinuousCleanup_, false);
   nodeHandle_.param("scanning_duration", map_.scanningDuration_, 1.0);
   nodeHandle_.param("masked_replace_service_mask_layer_name", maskedReplaceServiceMaskLayerName_, std::string("mask"));
+  nodeHandle_.param("clear_points_below", map_.clear_points_below_, -std::numeric_limits<double>::max());
+  nodeHandle_.param("clear_points_above", map_.clear_points_above_, std::numeric_limits<double>::max());
 
   // Settings for initializing elevation map
   nodeHandle_.param("initialize_elevation_map", initializeElevationMap_, false);
@@ -393,6 +395,9 @@ void ElevationMapping::pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr
     resetMapUpdateTimer();
     return;
   }
+
+  // Clear cells that have an elevation too large or too small
+  map_.elevationCleanup(sensorProcessor_->transformationSensorToMap_);
 
   if (publishPointCloud) {
     // Publish elevation map.

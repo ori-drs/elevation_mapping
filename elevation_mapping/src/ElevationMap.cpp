@@ -519,6 +519,29 @@ void ElevationMap::move(const Eigen::Vector2d& position) {
   }
 }
 
+void ElevationMap::elevationCleanup(const Eigen::Affine3d &transformationSensorToMap) {
+
+  if(clear_points_above_ == std::numeric_limits<double>::max() &&
+     clear_points_below_ == -std::numeric_limits<double>::max())
+  {
+    return;
+  }
+
+  double sensor_elevation = transformationSensorToMap.translation().z();
+  boost::recursive_mutex::scoped_lock scopedLockForRawData(rawMapMutex_);
+
+  for (grid_map::GridMapIterator iterator(rawMap_); !iterator.isPastEnd(); ++iterator) {
+    /*if (!rawMap_.isValid(*iterator)) {
+      continue;
+    }*/
+    auto& elevation = rawMap_.at("elevation", *iterator);
+    if (elevation < ( sensor_elevation + clear_points_below_) ||
+        elevation > ( sensor_elevation + clear_points_above_) ) {
+      elevation = std::numeric_limits<float>::infinity();
+    }
+  }
+}
+
 bool ElevationMap::publishRawElevationMap() {
   if (!hasRawMapSubscribers()) {
     return false;
